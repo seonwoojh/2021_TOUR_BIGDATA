@@ -17,12 +17,12 @@ import numpy as np
 
 # Driver 창 켜기
 
-driver = webdriver.Chrome("C:/Users/Stat1316_02/Desktop/naverband/chromedriver.exe") # Chromedriver PATH
+driver = webdriver.Chrome("C:/Users/Stat1305_01/Desktop/인스타그램 크롤링/chromedriver.exe") # Chromedriver PATH
 driver.get("https://story.kakao.com/")
 driver.maximize_window()
 time.sleep(3)
 
-username = 'tjswl950@naver.com'
+username = 'zx0982@kakao.com'
 password = 'xhdrP123@'
 
 element_id = driver.find_element_by_name("email")
@@ -41,92 +41,87 @@ time.sleep(3)
 
 # 해시태그 검색창 들어가기
 keyword = input('검색할 단어를 입력하세요 : ')  # Search #
+count = 50
 
 url = "https://story.kakao.com/hashtag/{}/".format(keyword)
 
 driver.get(url)
 time.sleep(5)
 
+SCROLL_PAUSE_SEC = 0.5
+#
+# # 스크롤 높이 가져옴
+# last_height = driver.execute_script("return document.body.scrollHeight")
+#
+# while True:
+#     # 끝까지 스크롤 다운
+#     driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+#
+#     # 1초 대기
+#     time.sleep(SCROLL_PAUSE_SEC)
+#
+#     # 스크롤 다운 후 스크롤 높이 다시 가져옴
+#     new_height = driver.execute_script("return document.body.scrollHeight")
+#     if new_height == last_height:
+#         break
+#     last_height = new_height
 
-# 첫번째 게시글 클릭하기 탭 엔터 esc 활용
-# driver.find_element_by_css_selector('.img_thumb._img').click()
 
-actions = ActionChains(driver)
+list = driver.find_elements_by_css_selector('.img_thumb._img')
+action = ActionChains(driver)
+action.move_to_element(list[0]).perform()
 
-element = driver.find_element_by_css_selector('.img_thumb._img')
-hover = actions.move_to_element(element).click()
-hover.perform()
-time.sleep(3)
-# driver.find_element_by_css_selector('._btnClose').click()
-# time.sleep(1.5)
-# # hover.key_down(Keys.ENTER)
-# hover.move_to_element_with_offset(element, 50, 2).click()
-# ###
-# # time.sleep(5)
-# # hover.key_down(Keys.ESCAPE)
+#홈으로 올라가기 추가
 
 # 카카오스토리 크롤링(제발)
-
 seq = 0
 start = time.time()
-##데이터를 저장할 Dictionary
-insta_dict = {'id': [],'date': []}
-if driver.find_element_by_css_selector('._btnClose'):
-    if seq % 20 == 0:
-        print('{}번째 수집 중'.format(seq), time.time() - start, sep='\t')
-        driver.implicitly_wait(5)
-        info_id = driver.find_element_by_css_selector('a.pf_name').text
-        insta_dict['id'].append(info_id)
-        driver.implicitly_wait(5)
-        time_raw = driver.find_element_by_css_selector('span.time').text # 인스타 날짜형식 따오는거 그대로 쓰기
-        insta_dict['date'].append(time_raw)
-        driver.implicitly_wait(5)
-        seq += 1
-        if seq == 1:
-            df = pd.DataFrame.from_dict(insta_dict)
-            df.to_excel('C:/Users/Stat1316_02/Desktop/naverband/' + keyword + "_results.xlsx")
+# 데이터를 저장할 Dictionary
+kakao_dict = {'id': [],'date': [], 'text': [], 'tag': []}
 
+for j in range(count):
+    time.sleep(3)
+    list = driver.find_elements_by_css_selector('.img_thumb._img')
+    action = ActionChains(driver)
+    action.move_to_element(list[j]).click().perform()
+    # driver.find_elements_by_css_selector('.img_thumb._img')[j].click()
+    time.sleep(3)
 
+    # id수집 - 이름
+    info_id = driver.find_element_by_css_selector('a.pf_name').text
+    kakao_dict['id'].append(info_id)
+    driver.implicitly_wait(5)
 
-    #
-    #         ## like 정보 수집
-    #         try:
-    #             driver.implicitly_wait(5)
-    #             driver.find_element_by_css_selector('button.sqdOP.yWX7d._8A5w5')
-    #             like = driver.find_element_by_css_selector('button.sqdOP.yWX7d._8A5w5').text
-    #             insta_dict['like'].append(like)
-    #             driver.implicitly_wait(5)
-    #
-    #         except:
-    #             insta_dict['like'].append('영상')
-    #
-    #         ##text 정보수집
-    #         driver.implicitly_wait(5)
-    #         raw_info = driver.find_element_by_css_selector('div.C4VMK').text.split()
-    #         text = []
-    #         for i in range(len(raw_info)):
-    #             ## 첫번째 text는 아이디니까 제외
-    #             if i == 0:
-    #                 pass
-    #             ## 두번째부터 시작
-    #             else:
-    #                 if '#' in raw_info[i]:
-    #                     pass
-    #                 else:
-    #                     text.append(raw_info[i])
-    #         clean_text = ' '.join(text)
-    #         insta_dict['text'].append(clean_text)
-    #         driver.implicitly_wait(5)
-    #
-    #         ##hashtag 수집
-    #         driver.implicitly_wait(5)
-    #         raw_tags = driver.find_elements_by_css_selector('a.xil3i')
-    #         hash_tag = []
-    #         for i in range(len(raw_tags)):
-    #             if raw_tags[i].text == '':
-    #                 pass
-    #             else:
-    #                 hash_tag.append(raw_tags[i].text)
-    #
-    #         insta_dict['hashtag'].append(hash_tag)
-    #
+    # 시간 수집
+    time_raw = driver.find_element_by_css_selector('span.time').text
+    kakao_dict['date'].append(time_raw)
+    driver.implicitly_wait(5)
+
+    # text 수집
+
+    content = driver.find_element_by_css_selector('div._content').text.split()
+    text = []
+    for i in range(len(content)):
+        if '#' in content[i]:
+            pass
+        else:
+            text.append(content[i])
+    clean_text = ' '.join(text)
+    kakao_dict['text'].append(clean_text)
+    driver.implicitly_wait(5)
+
+    # hashtag 수집
+    hash = driver.find_element_by_css_selector('div._content').text.split()
+    hashtags = []
+    for i in range(len(hash)):
+        if '#' in hash[i]:
+            hashtags.append(hash[i])
+        else:
+            pass
+    kakao_dict['tag'].append(hashtags)
+    time.sleep(3)
+    driver.find_element_by_css_selector('._btnClose').click()
+    time.sleep(3)
+
+df = pd.DataFrame.from_dict(kakao_dict)
+df.to_excel('C:/Users/Stat1305_01/Desktop/naverband/' + keyword + "_results.xlsx")
