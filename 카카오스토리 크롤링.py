@@ -22,8 +22,8 @@ driver.get("https://story.kakao.com/")
 driver.maximize_window()
 time.sleep(3)
 
-username = 'zx0982@kakao.com'
-password = 'xhdrP123@'
+username = ''
+password = ''
 
 element_id = driver.find_element_by_name("email")
 element_id.send_keys(username)
