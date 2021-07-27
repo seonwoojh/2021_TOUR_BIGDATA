@@ -68,7 +68,7 @@ time.sleep(3)
 
 
 
-# 인스타그램 크롤링(제발)
+# 인스타그램 크롤링
 
 seq = 0
 start = time.time()
@@ -108,7 +108,7 @@ while True:
                 driver.implicitly_wait(5)
 
             except:
-                insta_dict['like'].append('영상')
+                insta_dict['like'].append('')
 
             ##text 정보수집
             driver.implicitly_wait(5)
